@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "common.h"
+
 using std::sqrt;
 
 class vec3 {
@@ -45,9 +47,21 @@ class vec3 {
             return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
         }
 
+        inline static vec3 random() {
+            return vec3(random_double(), random_double(), random_double());
+        }
+
+        inline static vec3 random(double min, double max) {
+            return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
+        }
+
     public:
         double e[3];
 };
+
+// Type aliases for vec3
+using point3 = vec3;   // 3D point
+using color = vec3;    // RGB color
 
 // vec3 Utility Functions
 
@@ -95,8 +109,35 @@ inline vec3 unit_vector(vec3 v) {
     return v / v.length();
 }
 
-// Type aliases for vec3
-using point3 = vec3;   // 3D point
-using color = vec3;    // RGB color
+/**
+ * Generate a random vector within the unit sphere by 
+ * randomly generating values until a vector is valid
+*/
+vec3 random_in_unit_sphere(){
+    while(true) {
+        auto p = vec3::random(-1, 1);
+        if (p.length_squared() >= 1) continue;
+        return p;
+    }
+}
+
+/**
+ * Random unit vector on the unit sphere
+*/
+vec3 random_unit_vector() {
+    return unit_vector(random_in_unit_sphere());
+}
+
+/**
+ * Random unit vector in the hemisphere away from the hit point
+*/
+vec3 random_in_hemisphere(const vec3& normal) {
+    vec3 in_unit_sphere = random_in_unit_sphere();
+    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
 
 #endif
